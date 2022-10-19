@@ -79,3 +79,8 @@ results<-romicsExportData(romics_proteins,statistics = F,missing_data = F)
 results<-merge(IDsdetails,results,by.x = "UniProt_Name", by.y=0)
 write.csv(results, "./03_output_files/results_MicroPOTS_proteomics.csv")
 ```
+and the "romics_proteins" object was saved
+```{r}
+save(romics_proteins,file= "03_output_files/romics_proteins.rda")
+```
+

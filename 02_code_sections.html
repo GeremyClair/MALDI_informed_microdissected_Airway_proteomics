@@ -534,6 +534,8 @@ and PCA.</p>
 <pre class="r"><code>results&lt;-romicsExportData(romics_proteins,statistics = F,missing_data = F)
 results&lt;-merge(IDsdetails,results,by.x = &quot;UniProt_Name&quot;, by.y=0)
 write.csv(results, &quot;./03_output_files/results_MicroPOTS_proteomics.csv&quot;)</code></pre>
+<p>and the “romics_proteins” object was saved</p>
+<pre class="r"><code>save(romics_proteins,file= &quot;03_output_files/romics_proteins.rda&quot;)</code></pre>
 </div>
 
 
