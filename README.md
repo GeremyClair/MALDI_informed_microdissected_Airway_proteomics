@@ -25,7 +25,7 @@ Running the code require:
 
 - The package[RomicsProcessor v.1.0.0](https://github.com/PNNL-Comp-Mass-Spec/RomicsProcessor/blob/master/RomicsProcessor_1.0.0.tar.gz) (follow the package page for installation instructions). RomicsProcessor is an R package that can be used to analyze omics data. The package provides a structured R object to store the data, allowing for reproducible data analysis. The package also supports creating analytically pipelines from previously processed objects and applying these pipeline to other objects. This allows for rapid development and reuse of bioinformatics methods.
 
-- To run the code create a copy of the repository in a folder on your computer and open the file named "02 - Code.Rmd" and in the rmd file change the working directory on line 17
+- To run the code create a copy of the repository in a folder on your computer and open the file named "02_code_sections.Rmd" and in the rmd file change the working directory on line 17
 
 - The version of the different dependencies that were employed at time of analysis are contained in the "romics_proteins.rda" object located in the folder ".*/03 - Output files". After loading the object in the R environment you can get the version of all packages by typing the following in the R console
 ```
