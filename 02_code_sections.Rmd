@@ -1,0 +1,81 @@
+---
+title: 'MALDI-informed microdissected Airway proteomics'
+author: Geremy Clair
+date: October 19, 2022
+output:
+  html_document:
+    toc: true
+    toc_depth: 2
+    number_sections: true
+    theme : cerulean
+    code_folding: hide
+---
+
+```{r knit_options, message=FALSE, warning=FALSE, include=FALSE, paged.print=FALSE}
+knitr::opts_chunk$set(fig.width=10, fig.height=6, echo = TRUE, results = TRUE, warning = FALSE, message=FALSE) 
+options(repos=structure(c(CRAN="https://mirror.ibcp.fr/pub/CRAN/")))
+setwd("~/Documents/GitHub/MALDI_informed_microdissected_Airway_proteomics/")
+```
+
+# Required libraries
+
+The required libraries are loaded 
+- RomicsProcessor written by Geremy Clair (2022) is used to perform trackable transformation and statistics to the dataset 
+```{r load_packages}
+library("RomicsProcessor")
+```
+
+
+# MaxQuant import
+
+The iBAQ data contained in the protein table was loaded, the corresponding metadata was loaded
+```{r data_metadata_load}
+data<-extractMaxQuant("./01_source_files/proteinGroups.txt",quantification_type = "iBAQ",cont.rm = T,site.rm = T,rev.rm = T)
+IDsdetails<-extractMaxQuantIDs("./01_source_files/proteinGroups.txt",cont.rm = T,site.rm = T,rev.rm = T)
+IDsdetails<-cbind(UniProt_Name=sub(".*\\|","",IDsdetails$protein.ids), IDsdetails)
+metadata<- read.csv(file = "./01_source_files/metadata.csv")
+colnames(data)<- sub("iBAQ.","",colnames(data))
+colnames(metadata)<-tolower(colnames(metadata))
+write.csv(IDsdetails,"03_output_files/MaxQuantIDS.csv")
+```
+
+# Romics_object creation
+
+The data and metadata were placed in an romics_object, the sample names were retrieved from the metadata
+```{r create_romics}
+romics_proteins<- romicsCreateObject(data, metadata,main_factor = "desc")
+```
+
+# Data evaluation and transformation
+
+The missingness was evaluated for each section
+```{r missingness_eval}
+romics_proteins<- romicsZeroToMissing(romics_proteins)
+romicsPlotMissing(romics_proteins)
+```
+
+The proteins to be conserved for quantification were selected to contain at least 70% of complete values (5/7 samples), the overall missingness was evaluated after filtering.
+```{r missing_filter}
+romics_proteins<-romicsFilterMissing(romics_proteins, percentage_completeness = 70,main_factor = "none")
+print(paste0(nrow(romics_proteins$data),"/", nrow(romics_proteins$original_data)," proteins remained after filtering", " (",round(nrow(romics_proteins$data)/nrow(romics_proteins$original_data)*100,2),"%)."))
+romicsPlotMissing(romics_proteins)
+```
+The protein abundance was median centered prior to plot distribution boxplots.
+```{r median_norm}
+romics_proteins<-log2transform(romics_proteins)
+romics_proteins<-medianCenterSample(romics_proteins)
+distribBoxplot(romics_proteins)
+```
+
+The grouping of the samples by is checked by hierarchical clustering and PCA.
+```{r hclust_no_imput}
+romicsHclust(romics_proteins)
+indPCAplot(romics_proteins,Xcomp = 1,Ycomp = 2,plotType = "individual",ncp=5)
+```
+
+Finally the data was exported.
+```{r export_results}
+results<-romicsExportData(romics_proteins,statistics = F,missing_data = F)
+results<-merge(IDsdetails,results,by.x = "UniProt_Name", by.y=0)
+write.csv(results, "./03_output_files/results_MicroPOTS_proteomics.csv")
+```
